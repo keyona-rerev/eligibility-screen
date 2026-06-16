@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Will My Athlete Be Eligible? — NCAA Eligibility Quick Screen — Athlete Site</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+  :root{
+    --bg:#0A0A0A; --panel:#111111; --fg:#FFFFFF; --border:#1F1F1F; --border2:#2A2A2A;
+    --muted:#B8B8B8; --faint:#6f6f6f; --accent:#FF4D00; --accent-ink:#0A0A0A; --live:#4ADE80;
+    --sans:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--fg);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased}
+  body{padding:clamp(16px,3vw,40px);position:relative}
+  .grid-overlay{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:64px 64px;opacity:.15;z-index:0;pointer-events:none}
+  .wrap{max-width:1140px;margin:0 auto;display:grid;grid-template-columns:330px 1fr;gap:clamp(20px,3vw,44px);align-items:start;position:relative;z-index:1}
+  @media(max-width:880px){.wrap{grid-template-columns:1fr}}
+  .label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+
+  .register{position:sticky;top:24px;display:flex;flex-direction:column;gap:18px}
+  @media(max-width:880px){.register{position:static}}
+  .reg-block{border-top:1px solid var(--border);padding-top:14px}
+  .reg-block:first-of-type{border-top:none;padding-top:0}
+  .lede-title{font-family:var(--sans);font-weight:700;font-size:24px;line-height:1.08;letter-spacing:-.02em;margin-top:8px}
+  .lede-sub{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.55}
+  .field{display:flex;flex-direction:column;gap:7px;margin-top:14px}
+  .field .label{font-weight:500}
+  .field .opt{text-transform:none;letter-spacing:0;color:var(--faint)}
+  .field input,.field select{background:var(--panel);border:1px solid var(--border2);border-radius:2px;color:var(--fg);font-family:var(--mono);font-size:13px;padding:11px 12px;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none;cursor:pointer}
+  .field input{cursor:text}
+  .field select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M3 4.5L6 7.5L9 4.5' stroke='%23FF4D00' stroke-width='1.4' fill='none'/></svg>");background-repeat:no-repeat;background-position:right 12px center}
+  .field select option{background:#111;color:var(--fg)}
+  .field input:focus,.field select:focus{border-color:var(--accent)}
+  .field input::placeholder{color:var(--faint)}
+  .turnstile-wrap{margin-top:14px}
+  .run{margin-top:16px;border:none;cursor:pointer;border-radius:2px;width:100%;background:var(--accent);color:var(--accent-ink);font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:13px 16px;transition:filter .15s,opacity .2s}
+  .run:hover:not(:disabled){filter:brightness(1.08)}
+  .run:disabled{opacity:.35;cursor:not-allowed;background:var(--border2);color:var(--faint)}
+  .reg-note{font-size:11.5px;color:var(--faint);line-height:1.55;margin-top:14px;font-family:var(--mono)}
+
+  .stage{display:flex;flex-direction:column;align-items:center}
+  .empty{width:min(560px,100%);text-align:center;padding:60px 24px;border:1px solid var(--border2);border-radius:2px;background:var(--panel)}
+  .empty .et{font-family:var(--sans);font-weight:600;font-size:19px;color:var(--fg);letter-spacing:-.01em}
+  .empty .es{font-size:12px;color:var(--faint);margin-top:8px;font-family:var(--mono)}
+  .spinner{width:28px;height:28px;border:2.5px solid rgba(255,77,0,.25);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .bracketed{position:relative}
+  .bracketed::before,.bracketed::after,.bracketed>.br-tr,.bracketed>.br-bl{content:"";position:absolute;width:14px;height:14px;border:1px solid var(--accent);pointer-events:none;z-index:2}
+  .bracketed::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+  .bracketed::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+  .bracketed>.br-tr{top:-1px;right:-1px;border-left:0;border-bottom:0}
+  .bracketed>.br-bl{bottom:-1px;left:-1px;border-right:0;border-top:0}
+
+  .card{width:min(560px,100%);background:var(--bg);border:1px solid var(--border2);border-radius:2px;padding:clamp(22px,4vw,34px)}
+  .card-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:13px;gap:10px}
+  .brand{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg);font-weight:600}
+  .brand .x{color:var(--accent)}
+  .who{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right}
+  .hero{position:relative;margin-top:20px;padding:30px 18px 26px;background:var(--panel);border:1px solid var(--border2);border-radius:2px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;overflow:hidden}
+  .hero .bar{position:absolute;top:0;left:0;height:3px;width:100%;background:var(--accent)}
+  .hero .ht{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .hero .figure{font-family:var(--sans);font-weight:800;font-size:clamp(44px,11vw,66px);color:var(--fg);line-height:1;letter-spacing:-.03em}
+  .hero .figure.small{font-size:clamp(28px,7vw,42px);letter-spacing:-.02em}
+  .hero .figure-sub{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .caption{text-align:center;margin-top:18px}
+  .verdict{font-family:var(--sans);font-weight:700;font-size:20px;letter-spacing:-.01em}
+  .firstread{font-size:14px;color:var(--muted);margin-top:7px;line-height:1.55}
+  .rows{margin-top:20px;border-top:1px solid var(--border)}
+  .row{display:flex;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+  .row-label{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);width:150px;flex-shrink:0;line-height:1.5}
+  .row-val{font-size:13.5px;color:var(--fg);flex:1;line-height:1.5}
+  .row-val .em{color:var(--accent);font-weight:600}
+  .reads{margin-top:20px;border-top:1px solid var(--border);padding-top:16px;display:flex;flex-direction:column;gap:15px}
+  .read .rk{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:500}
+  .read .rt{font-size:13.5px;line-height:1.55;color:var(--fg);margin-top:6px}
+  .card-foot{margin-top:18px;border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;gap:8px}
+
+  .share-row{width:min(560px,100%);text-align:center;margin-top:20px}
+  .share-link{display:inline-flex;align-items:center;gap:8px;text-decoration:none;border:1px solid var(--border2);color:var(--fg);font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:12px 22px;border-radius:2px;transition:border-color .15s}
+  .share-link:hover{border-color:var(--accent)}
+  .cta{width:min(560px,100%);margin-top:24px;border:1px solid var(--border2);border-radius:2px;padding:22px;background:var(--panel)}
+  .cta-title{font-family:var(--sans);font-weight:700;font-size:18px;letter-spacing:-.01em}
+  .cta-sub{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.55}
+  .cta-btn{display:inline-block;margin-top:14px;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:12px 22px;border-radius:2px}
+  .foot{margin-top:24px;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--faint);text-transform:uppercase}
+  .foot a{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="grid-overlay"></div>
+<div class="wrap">
+  <aside class="register">
+    <div class="reg-block">
+      <div class="label">The Eligibility Question</div>
+      <div class="lede-title">Will my athlete even be eligible?</div>
+      <div class="lede-sub">A quick NCAA initial-eligibility risk screen, before it becomes a senior-year emergency. Risk flags only — the NCAA Eligibility Center makes the official call.</div>
+    </div>
+    <div class="reg-block">
+      <div class="field"><div class="label">Parent or athlete name</div><input id="inName" placeholder="Jane Smith" autocomplete="name"></div>
+      <div class="field"><div class="label">Email</div><input id="inEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="field"><div class="label">Division target</div>
+        <select id="inDiv">
+          <option value="" selected disabled>Pick a division…</option>
+          <option value="DI">Division I (DI)</option>
+          <option value="DII">Division II (DII)</option>
+        </select>
+      </div>
+      <div class="field"><div class="label">Core courses completed <span class="opt">of 16</span></div><input id="inCore" type="number" min="0" max="16" step="1" placeholder="e.g. 9" inputmode="numeric"></div>
+      <div class="field"><div class="label">Core-course GPA <span class="opt">on a 4.0 scale</span></div><input id="inGpa" type="number" min="0" max="4.5" step="0.01" placeholder="e.g. 3.1" inputmode="decimal"></div>
+      <div class="field"><div class="label">Graduation year</div><input id="inGrad" type="number" min="2024" max="2035" step="1" placeholder="e.g. 2028" inputmode="numeric"></div>
+      <div class="turnstile-wrap"><div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-theme="dark"></div></div>
+      <button class="run" id="runBtn" disabled>Add details to run</button>
+      <div class="reg-note">Risk flags only, not an official determination. Standardized tests are not required for NCAA initial eligibility. Confirm everything at the NCAA Eligibility Center.</div>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="empty" id="empty">
+      <div class="et">No screen yet.</div>
+      <div class="es">Add your details and run the eligibility screen.</div>
+    </div>
+
+    <div class="card bracketed" id="card" style="display:none">
+      <span class="br-tr"></span><span class="br-bl"></span>
+      <div class="card-head">
+        <div class="brand">ATHLETE SITE <span class="x">/</span> ELIGIBILITY QUICK SCREEN</div>
+        <div class="who" id="who"></div>
+      </div>
+      <div class="hero"><div class="bar"></div><div class="ht">Eligibility risk read</div><div class="figure" id="heroFig"></div><div class="figure-sub" id="heroSub"></div></div>
+      <div class="caption"><div class="verdict" id="verdict"></div><div class="firstread" id="firstread"></div></div>
+      <div class="rows" id="rows"></div>
+      <div class="reads" id="reads"></div>
+      <div class="card-foot"><span>athlete-site.com</span><span>Risk flags only · not an official determination</span></div>
+    </div>
+
+    <div class="share-row" id="shareRow" style="display:none"><a class="share-link" id="shareLink" href="#" target="_blank" rel="noopener">View &amp; download your card →</a></div>
+
+    <div class="cta">
+      <div class="cta-title">A site that gets your athlete seen.</div>
+      <div class="cta-sub">Eligibility is the floor. The next step is making sure college coaches can actually find your athlete. That is what we build.</div>
+      <a class="cta-btn" href="https://athlete-site.com" target="_blank" rel="noopener">See how it works →</a>
+    </div>
+    <div class="foot">An Athlete Site tool · <a href="https://athlete-site.com" target="_blank" rel="noopener">athlete-site.com</a></div>
+  </main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const emailOk = e => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
+const esc = s => String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const LOAD = ["Checking the core-course rules…","Reading the GPA floor…","Flagging the timing risks…","Writing your read…"];
+let loading=false, loadTimer=null;
+
+function refresh(){
+  const gpa=parseFloat($('inGpa').value), core=parseInt($('inCore').value,10);
+  const ready = $('inName').value.trim() && emailOk($('inEmail').value.trim()) && $('inDiv').value && $('inCore').value!=='' && core>=0 && core<=16 && $('inGpa').value!=='' && gpa>=0 && gpa<=4.5 && $('inGrad').value;
+  $('runBtn').disabled = !ready || loading;
+  $('runBtn').textContent = loading ? 'Reading…' : (ready ? 'Run the screen' : 'Add details to run');
+}
+['inName','inEmail','inCore','inGpa','inGrad'].forEach(id=>$(id).addEventListener('input',refresh));
+$('inDiv').addEventListener('change',refresh);
+$('runBtn').addEventListener('click',run);
+
+async function run(){
+  if(loading) return;
+  const full_name=$('inName').value.trim(), email=$('inEmail').value.trim();
+  const division=$('inDiv').value, core_done=$('inCore').value, core_gpa=$('inGpa').value, grad_year=$('inGrad').value;
+  if(!full_name||!emailOk(email)||!division||core_done===''||core_gpa===''||!grad_year){refresh();return;}
+  let token='';
+  try{ token=(window.turnstile&&turnstile.getResponse&&turnstile.getResponse())||document.querySelector('[name=cf-turnstile-response]')?.value||''; }catch(e){}
+  loading=true; refresh(); showLoading();
+  try{
+    const res=await fetch('/api/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({full_name,email,division,core_done,core_gpa,grad_year,turnstile_token:token})});
+    const data=await res.json();
+    if(!res.ok){ showError(data&&data.error?data.error:'Something went wrong. Please try again.'); }
+    else render(data);
+  }catch(err){ showError("The reading didn't come through. Please try again."); }
+  finally{ loading=false; refresh(); try{ window.turnstile&&turnstile.reset&&turnstile.reset(); }catch(e){} }
+}
+
+function showLoading(){
+  $('card').style.display='none'; $('shareRow').style.display='none';
+  $('empty').style.display='block';
+  $('empty').innerHTML='<div class="spinner"></div><div class="es" id="lm">'+LOAD[0]+'</div>';
+  let i=0; clearInterval(loadTimer); loadTimer=setInterval(()=>{i=(i+1)%LOAD.length;const el=$('lm');if(el)el.textContent=LOAD[i];},1400);
+}
+function showError(msg){ clearInterval(loadTimer); $('card').style.display='none'; $('shareRow').style.display='none'; $('empty').style.display='block'; $('empty').innerHTML='<div class="et">'+esc(msg)+'</div><div class="es">Check the core count (0-16) and GPA, then try again.</div>'; }
+
+function render(r){
+  clearInterval(loadTimer);
+  $('who').textContent=r.who||'';
+  $('heroFig').textContent=r.hero||''; $('heroFig').className='figure'+(r.hero_small?' small':'');
+  $('heroSub').textContent=r.hero_sub||'';
+  $('verdict').textContent=r.verdict||''; $('firstread').textContent=r.first_read||'';
+  $('rows').innerHTML=(r.rows||[]).map(row=>'<div class="row"><div class="row-label">'+esc(row.label)+'</div><div class="row-val">'+(row.accent?'<span class="em">'+esc(row.value)+'</span>':esc(row.value))+'</div></div>').join('');
+  $('reads').innerHTML=(r.reads||[]).map(rd=>'<div class="read"><div class="rk">'+esc(rd.kicker)+'</div><div class="rt">'+esc(rd.text)+'</div></div>').join('');
+  $('empty').style.display='none'; $('card').style.display='block';
+  if(r.token){ $('shareLink').href='/report.html?t='+encodeURIComponent(r.token); $('shareRow').style.display='block'; }
+}
+refresh();
+</script>
+</body>
+</html>
