@@ -1,0 +1,17 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Pretty endpoints: the pages call /api/*, which route to the functions.
+[[redirects]]
+  from = "/api/report"
+  to = "/.netlify/functions/eligibility"
+  status = 200
+
+[[redirects]]
+  from = "/api/get-report"
+  to = "/.netlify/functions/get-report"
+  status = 200
