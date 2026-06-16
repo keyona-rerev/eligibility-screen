@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eligibility Quick Screen — Your Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --bg:#0A0A0A; --panel:#111111; --fg:#FFFFFF; --border:#1F1F1F; --border2:#2A2A2A;
+    --muted:#B8B8B8; --faint:#6f6f6f; --accent:#FF4D00; --accent-ink:#0A0A0A; --live:#4ADE80;
+    --sans:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--fg);font-family:var(--sans);min-height:100vh;-webkit-font-smoothing:antialiased}
+  body{padding:clamp(16px,4vw,48px) 16px;position:relative;display:flex;flex-direction:column;align-items:center}
+  .grid-overlay{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:64px 64px;opacity:.15;z-index:0;pointer-events:none}
+  .state{font-family:var(--mono);font-size:13px;color:var(--muted);margin-top:60px;text-align:center;z-index:1}
+  .spinner{width:30px;height:30px;border:2.5px solid rgba(255,77,0,.25);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:60px auto 12px;z-index:1}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .bracketed{position:relative}
+  .bracketed::before,.bracketed::after,.bracketed>.br-tr,.bracketed>.br-bl{content:"";position:absolute;width:14px;height:14px;border:1px solid var(--accent);pointer-events:none;z-index:2}
+  .bracketed::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+  .bracketed::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+  .bracketed>.br-tr{top:-1px;right:-1px;border-left:0;border-bottom:0}
+  .bracketed>.br-bl{bottom:-1px;left:-1px;border-right:0;border-top:0}
+
+  .card{width:min(560px,100%);background:var(--bg);border:1px solid var(--border2);border-radius:2px;padding:clamp(22px,4vw,34px);position:relative;z-index:1}
+  .card-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:13px;gap:10px}
+  .brand{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg);font-weight:600}
+  .brand .x{color:var(--accent)}
+  .who{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:right}
+  .hero{position:relative;margin-top:20px;padding:30px 18px 26px;background:var(--panel);border:1px solid var(--border2);border-radius:2px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;overflow:hidden}
+  .hero .bar{position:absolute;top:0;left:0;height:3px;width:100%;background:var(--accent)}
+  .hero .ht{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .hero .figure{font-family:var(--sans);font-weight:800;font-size:clamp(44px,11vw,66px);color:var(--fg);line-height:1;letter-spacing:-.03em}
+  .hero .figure.small{font-size:clamp(28px,7vw,42px);letter-spacing:-.02em}
+  .hero .figure-sub{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .caption{text-align:center;margin-top:18px}
+  .verdict{font-family:var(--sans);font-weight:700;font-size:20px;letter-spacing:-.01em}
+  .firstread{font-size:14px;color:var(--muted);margin-top:7px;line-height:1.55}
+  .rows{margin-top:20px;border-top:1px solid var(--border)}
+  .row{display:flex;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+  .row-label{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);width:150px;flex-shrink:0;line-height:1.5}
+  .row-val{font-size:13.5px;color:var(--fg);flex:1;line-height:1.5}
+  .row-val .em{color:var(--accent);font-weight:600}
+  .reads{margin-top:20px;border-top:1px solid var(--border);padding-top:16px;display:flex;flex-direction:column;gap:15px}
+  .read .rk{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:500}
+  .read .rt{font-size:13.5px;line-height:1.55;color:var(--fg);margin-top:6px}
+  .card-foot{margin-top:18px;border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;gap:8px}
+
+  .controls{width:min(560px,100%);margin-top:20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;z-index:1}
+  .btn{border:none;cursor:pointer;border-radius:2px;font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:13px 22px;transition:filter .15s;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+  .btn.dl{background:var(--accent);color:var(--accent-ink)}
+  .btn.dl:hover{filter:brightness(1.08)}
+  .btn.dl:disabled{opacity:.55;cursor:wait}
+  .btn.cta{background:transparent;border:1px solid var(--border2);color:var(--fg)}
+  .btn.cta:hover{border-color:var(--accent)}
+  .dl-status{width:100%;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted);min-height:1.1em}
+  .foot{margin-top:22px;font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase;z-index:1}
+  .foot a{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="grid-overlay"></div>
+<div id="loading"><div class="spinner"></div><div class="state">Pulling your card…</div></div>
+<div id="error" class="state" style="display:none">This card couldn't be found. The link may be old or incomplete.</div>
+
+<div id="card" class="card bracketed" style="display:none">
+  <span class="br-tr"></span><span class="br-bl"></span>
+  <div class="card-head"><div class="brand">ATHLETE SITE <span class="x">/</span> ELIGIBILITY QUICK SCREEN</div><div class="who" id="who"></div></div>
+  <div class="hero"><div class="bar"></div><div class="ht">Eligibility risk read</div><div class="figure" id="heroFig"></div><div class="figure-sub" id="heroSub"></div></div>
+  <div class="caption"><div class="verdict" id="verdict"></div><div class="firstread" id="firstread"></div></div>
+  <div class="rows" id="rows"></div>
+  <div class="reads" id="reads"></div>
+  <div class="card-foot"><span>athlete-site.com</span><span>Risk flags only · not an official determination</span></div>
+</div>
+
+<div class="controls" id="controls" style="display:none">
+  <button class="btn dl" id="dlBtn" onclick="downloadAsImage()">⬇ Download as PNG</button>
+  <a class="btn cta" href="https://athlete-site.com" target="_blank" rel="noopener">Get your athlete seen →</a>
+  <div class="dl-status" id="dlStatus"></div>
+</div>
+<div class="foot" id="footLink" style="display:none"><a href="/">Run your own →</a></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const token=new URLSearchParams(location.search).get('t')||'';
+init();
+async function init(){
+  if(!token) return fail();
+  try{ const res=await fetch('/api/get-report?t='+encodeURIComponent(token)); if(!res.ok) return fail(); render(await res.json()); }
+  catch(e){ fail(); }
+}
+function fail(){ $('loading').style.display='none'; $('error').style.display='block'; }
+function render(r){
+  $('who').textContent=r.who||'';
+  $('heroFig').textContent=r.hero||''; $('heroFig').className='figure'+(r.hero_small?' small':'');
+  $('heroSub').textContent=r.hero_sub||'';
+  $('verdict').textContent=r.verdict||''; $('firstread').textContent=r.first_read||'';
+  $('rows').innerHTML=(r.rows||[]).map(row=>'<div class="row"><div class="row-label">'+esc(row.label)+'</div><div class="row-val">'+(row.accent?'<span class="em">'+esc(row.value)+'</span>':esc(row.value))+'</div></div>').join('');
+  $('reads').innerHTML=(r.reads||[]).map(rd=>'<div class="read"><div class="rk">'+esc(rd.kicker)+'</div><div class="rt">'+esc(rd.text)+'</div></div>').join('');
+  $('loading').style.display='none'; $('card').style.display='block'; $('controls').style.display='flex'; $('footLink').style.display='block';
+}
+async function downloadAsImage(){
+  const btn=$('dlBtn'), status=$('dlStatus'), target=$('card');
+  btn.disabled=true; btn.textContent='Capturing…'; status.textContent='';
+  try{
+    if(document.fonts&&document.fonts.ready) await document.fonts.ready;
+    const canvas=await html2canvas(target,{scale:2,useCORS:true,backgroundColor:'#0A0A0A',logging:false});
+    const link=document.createElement('a'); link.download='eligibility-quick-screen.png'; link.href=canvas.toDataURL('image/png'); link.click();
+    status.textContent='✓ Downloading — check your Downloads folder.'; status.style.color='#4ADE80';
+  }catch(err){ status.textContent='✗ Could not capture the image. Try again.'; status.style.color='#FF4D00'; }
+  finally{ btn.disabled=false; btn.textContent='⬇ Download as PNG'; }
+}
+</script>
+</body>
+</html>
